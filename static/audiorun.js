@@ -38,6 +38,68 @@ function gpt_calcgraphval(x, segments) {
   const y = bezier(t, seg.p0.y, seg.c0.y, seg.c1.y, seg.p1.y);
   return y;
 }
+// function parsemath(exp, localvars, lvarstack = [], returnfloat) {
+//     if (typeof exp !== 'string') exp = String(exp);
+
+//     if (exp.slice(0, 2) == "g!") {
+//         const jsp = JSON.parse(exp.slice(2));
+//         const evalu = jsp.min + (jsp.max - jsp.min) * gpt_calcgraphval(((localvars.t - mintime) / (maxtime - mintime)), jsp.segments);
+
+//         if (returnfloat) {
+//             return evalu;
+//         } else {
+//             return evalu.toString();
+//         }
+
+//     } else {
+//         // Match variables with optional indexing expression: $var#[expr]
+//         const varPattern = /\$([^#\[\]]+)#(?:\[([^\]]+)\])?/g;
+
+//         let match;
+//         while ((match = varPattern.exec(exp)) !== null) {
+//             const qvar = match[1];
+//             let idxExp = match[2];
+
+//             if (lvarstack.includes(qvar)) {
+//                 console.warn(`Circular reference detected: ${lvarstack.join(" → ")} → ${qvar}`);
+//                 exp = "0";
+//                 continue;
+//             } else if (qvar in localvars) {
+//                 const newStack = [...lvarstack, qvar];
+
+//                 let varValue = parsemath(localvars[qvar], localvars, newStack, true);
+
+//                 if (Array.isArray(localvars[qvar]) && idxExp !== undefined) {
+//                     // Evaluate index expression recursively
+//                     const idx = parsemath(idxExp, localvars, newStack, true);
+//                     varValue = localvars[qvar][idx];
+//                 } else if (Array.isArray(localvars[qvar])) {
+//                     varValue = JSON.stringify(localvars[qvar]);
+//                 }
+
+//                 // Replace the matched substring in the expression
+//                 const fullMatch = match[0];
+//                 exp = exp.replace(fullMatch, varValue);
+
+//                 // Reset lastIndex to handle multiple replacements correctly
+//                 varPattern.lastIndex = 0;
+//             }
+//         }
+
+//         if (exp.includes("#")) {
+//             console.warn("ERROR DETECTED: unresolved variable");
+//             return "0";
+//         }
+
+//         let returnv = "eval.toString()";
+//         if (returnfloat === true) {
+//             returnv = "parseFloat(eval.toString())";
+//         }
+
+//         const res = new Function(`const eval=${exp}; return ${returnv};`)();
+//         return res;
+//     }
+// }
 
 function parsemath(exp, localvars, lvarstack = [], returnfloat) {
 
@@ -57,14 +119,16 @@ function parsemath(exp, localvars, lvarstack = [], returnfloat) {
 
     } else {
         const matches = [...exp.matchAll(/\$([^#]+)#/g)];
-    const qvars = matches.map(m => m[1]);
+        
+
+        const qvars = matches.map(m => m[1]);
 
     qvars.forEach(qvar => {
         if (lvarstack.includes(qvar)) {
             console.warn(`Circular reference detected: ${lvarstack.join(" → ")} → ${qvar}`);
-            exp = "0"; // Optional: neutral fallback
+            exp = "0";
         } else if (qvar in localvars) {
-            const newStack = [...lvarstack, qvar]; // create a new stack for recursion
+            const newStack = [...lvarstack, qvar];
             const reg = new RegExp(`\\$${qvar}#`, 'g');
             const subexp = parsemath(localvars[qvar], localvars, newStack);
             exp = exp.replace(reg, subexp);

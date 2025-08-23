@@ -42,6 +42,14 @@ const varrprefab=document.getElementById("varr-prefab");
 const exportpbarlabel=document.getElementById("pbarlabel");
 const exportpbarfill=document.getElementById("pbarfill");
 const wavexpfreq=document.getElementById("wavexpfreq");
+const pwarnproceed=document.getElementById("pwproceed");
+const pwb=document.getElementById("portraitwarn");
+if (window.innerHeight>window.innerWidth) {
+  pwb.style.display="flex";
+}
+pwarnproceed.addEventListener("click",()=>{
+  pwb.style.display="none";
+})
 mixtrackinst.style.display="none"
 wrprefab.style.display="none"
 varrprefab.style.display="none"
