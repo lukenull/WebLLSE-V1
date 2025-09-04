@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Effects - Docs - WebLLSE</title>
+        
+
+<script src="{{ url_for('static', filename='format1.js') }}" ></script>
+<style>
+        body {
+            font-family: sans-serif;
+            background: #ffffff;
+            padding: 20px;
+        }
+
+        .headlabel, .subhdlabel, .deschead {
+            color: #000000;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+        }
+
+        .headlabel {
+            font-size: 30px;
+        }
+
+        .subhdlabel {
+            font-size: 25px;
+        }
+
+        .deschead {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .hline, .shline {
+            width: 50%;
+        }
+
+        .desc {
+            color: #000000;
+            font-size: 18px;
+            font-family: monospace;
+            margin-left:15%;
+            margin-right:15%;
+
+        }
+        .descgroup {
+            display:flex;
+            flex-direction:column;
+            
+
+        }
+        ul {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+        .pagelink2 {
+
+        }
+    </style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/topbarstyle.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/documentinfo.css') }}">
+
+
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <h1 class="headlabel">Documentation</h1>
+    <hr class="hline">
+    <div class="subhdlabel">Internal System</div>
+    <hr class="hline">
+    <div class="descgroup">
+        <!-- <div class="deschead">Web Audio API</div> -->
+        <div class="desc">
+            The main framework used to generate audio is the Web Audio API, an audio control framework for JavaScript. Specifically, the program uses <code>AudioBuffer</code>s to play audio built from procedurally generated samples based on custom-built DSP.
+            <br>
+            Data of every wave instance, effect object, variable, mixer track, and all of their parameters are stored in a dictionary (the associated JSON). When a note is played or a sample is exported, this data is sent to a dedicated JavaScript script for processing. When this script's sound generator function is called, it creates an AudioBuffer. During the processing, it first loops through all of the wave data and all variables (time-dependent and time-independent) and generates a series of math functions for sample value based on time from them. It then, based on the provided sample rate in samples per second, calculates each sample, until the block size is reached. At this point, it recalculates every math function to account for the new time value (<code>t</code>) (i.e. so any parameters, such as frequency, dependent on time are adjusted). Consequently, since the wave calculations are heavy on CPU, higher block size leads to significantly faster generation times, but lower time accuracy, making such block sizes most efficient for constant tones.
+            <br>
+            Every sample generation iteration, a sample for both the right and left channel are calculated, and each sample is stored in an array, with the array depending on the original wave instance's mixer track. These arrays are stored in a parent array.
+            <br>
+            After the initial array of mixer track sample arrays is generated, every mixer track sample set is sent through its associated effect chain, in sequence. Each effect object's process is done by a function which takes the left and right sample arrays as parameters, and operates on each sample in the array based on the effect. For example, the hard clipping function iterates through each sample and multiplies it by the pre-gain value, caps it at the clipping threshold, then multiplies that final capped value by the post-gain value.
+            <br>
+            After every array has been passed through its associated mixer track, every sample array is recombined as all sample data is added into two new arrays that represent the final left channel audio and right channel audio. This final set of right and left channel sample data is put into the AudioBuffer's channel data.
+            <br>
+            The AudioBuffer is returned as a value to the main script, which plays it via an AudioBufferSourceNode, connecting the buffer to the audio output.
+        </div>
+        
+        <div class="desc">
+            <ul>
+              
+            </ul>
+             <br>
+            <br>
+            <br>
+
+        </div>
+    </div>
+    
+    <hr class="shline">
+    <div class="descgroup">
+        <div class="desc">
+           </div>
+
+        <div class="deschead">
+            
+        </div>
+        
+    </div>
+</body>
+</html>
+<!DOCTYPE html>
+

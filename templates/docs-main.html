@@ -43,7 +43,14 @@
             font-size: 18px;
             font-family: monospace;
         }
+        .descgroup {
+            display:flex;
+            flex-direction:column;
+            margin-left:15%;
+            margin-right:15%;
 
+
+        }
         ul {
             margin-top: 10px;
             margin-bottom: 10px;
@@ -65,17 +72,24 @@
 
     <h1 class="headlabel">Documentation</h1>
     <hr class="hline">
-    <div class="desc">
+    <div class="descgroup">
+        <div class="desc">
        This is the homepage for WebLLSE's documentation. Read the pages to learn about the program.
         <br>
         <br>
         <br>
         <ul>
-            <li><a href="/docs/core" class="pagelink2">Core</a></li>
-            <li><a href="/docs/guide" class="pagelink2">Quick Start Guide</a></li>
-            <li><a href="/docs/licensing" class="pagelink2">Licensing</a></li>
+            <li><a href="/docs/core" class="pagelink2">Core</a> - WebLLSE features</li>
+            <li><a href="/docs/guide" class="pagelink2">Quick Start Guide</a> - Concise guide to creating sound</li>
+            <li><a href="/docs/system" class="pagelink2">Internal System</a> - Internal processes and how the app generates sound</li>
+            <li><a href="https://github.com/Alyphrius/WebLLSE-V1" class="pagelink2">Source Code (GitHub)</a> - View the web app's source code on GitHub</li>
+            <!-- <li><a href="/docs/usagetips" class="pagelink2">Design and Musical Tips</a></li> -->
+            <!-- <li><a href="/docs/effects" class="pagelink2">Effect Types</a></li> -->
+            <li><a href="/docs/licensing" class="pagelink2">Licensing</a> - Audio and data file licensing</li>
         </ul>
        
+    </div>
+    
     </div>
     
     <hr class="shline">

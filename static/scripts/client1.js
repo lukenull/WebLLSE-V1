@@ -44,6 +44,10 @@ const exportpbarfill=document.getElementById("pbarfill");
 const wavexpfreq=document.getElementById("wavexpfreq");
 const pwarnproceed=document.getElementById("pwproceed");
 const pwb=document.getElementById("portraitwarn");
+const filenamef=document.getElementById("filenamef");
+const projnamef=document.getElementById("projnamef");
+const whitekeyp=document.querySelector(".whitekeyp");
+const welbl1=document.getElementById("welbl1");
 if (window.innerHeight>window.innerWidth) {
   pwb.style.display="flex";
 }
@@ -61,7 +65,7 @@ import {module as emodule} from '../effect_modules.js';
 
 const notenames=[]
 for (let i=0;i<127;i++) {
-  notenames.push(["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"][i%12]+`${Math.floor(i/12)+1}`)
+  notenames.push(["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"][i%12]+`${Math.floor(i/12)-1}`)
 }
 
 
@@ -126,7 +130,7 @@ let preloadall=false //whether preload all keys when click load vs load on key p
 
 
 let letterknotes=['Z','S','X','D','C','V','G','B','H','N','J','M','Q','2','W','3','E','R','5','T','6','Y','7','U','I','9','O','0','P']
-let kboctave=2
+let kboctave=4
 export let keyfrequency=[0];
 let currentnote=-1
 let notedown=false
@@ -144,41 +148,62 @@ let selectedwrect=null
 let presets={}
 let currentmodvar=""
 
-
-for (let o=0;o<6;o++) { //Generate the piano keyboard
+let lwk;
+let midckey;
+for (let o=0;o<8;o++) { //Generate the piano keyboard
   let p=0;
   let p2=0;
+  let zi=50;
   for (let i=0;i<12;i++) {
     const v=12*o+i
     const sv=String(v);
-    const key=document.createElement("div");
+    let key;
+    let isblack=false;
+    let fil;
+    zi-=1;
     if ([1,3,6,8,10].includes(i%12)) {
-      
+      key=document.createElement("div")
       key.className="black key";
-      key.style.left=`${434*o+localblackp[p]}px`
+      //key.style.left=`${434*o+localblackp[p]}px`
+      isblack=true;
       p+=1;
     } else {
-      if (o==3) {
+      key=whitekeyp.cloneNode(true);
+      key.style.display="block";
+      if (o==5) {
         key.className="white key midc";
+        midckey=key;
       } else {
         key.className="white key";
       }
+      fil=document.createElement("div");
+      fil.className="wkfiller";
       
-      //key.style.left=`${60*(p2+12*o)}px`;
+      lwk=fil;
+      fil.style.zIndex=zi;
       p2+=1;
+      key.querySelector(".whitekeyl1").innerText=notenames[12*o+i]
+      key.querySelector(".whitekeyl2").innerText=`${12*o+i}`
     }
+    
     const btn=document.createElement("button");
+    
     btn.className="keybtn";
+    
+    if (fil) {
+      fil.appendChild(key);
+    }
+    
     function keydown() {
       console.log(voices)
-      if (Object.keys(voices).length>=numvoices) {return;}
+      
       currentnote=12*o+i;
-      keyfrequency[0]=440*2**((currentnote-33-24)/12)
+      keyfrequency[0]=440*2**((currentnote-33-36)/12)
       notedown=true;
       start2(true,sv);
     }
     function keyup() {
-      //if (notedown==false) {return;}
+      
       
       if (voices[v]) {
         currentnote=-1;
@@ -189,7 +214,13 @@ for (let o=0;o<6;o++) { //Generate the piano keyboard
         delete voices[sv]
       }
     }
-    keyboarddiv.appendChild(key)
+    if (isblack) {
+      lwk.appendChild(key);
+    } else {
+      keyboarddiv.appendChild(fil);
+      fil.appendChild(key)
+    }
+    
     key.appendChild(btn);
     if (o>=kboctave && v<12*kboctave+letterknotes.length) {
         document.addEventListener("keydown",function(event){
@@ -218,23 +249,27 @@ for (let o=0;o<6;o++) { //Generate the piano keyboard
 
   console.log("key down")
     });
-    key.addEventListener('touchstart',function(){
+    key.addEventListener('touchstart',function(e){
+      e.stopPropagation()
       keydown()
     })
-    key.addEventListener('mouseup',function(){
+    key.addEventListener('mouseup',function(e){
+      e.stopPropagation()
       keyup()
     });
-    key.addEventListener('mouseleave',function(){
+    key.addEventListener('mouseleave',function(e){
+      e.stopPropagation()
       keyup()
     })
-    key.addEventListener('touchend',function(){
+    key.addEventListener('touchend',function(e){
+      e.stopPropagation()
       keyup()
     })
   }
 }
 
 
-
+midckey.scrollIntoView();
 propinput1.addEventListener("input",function(){
   if (!selectedwave) return;
   selectedwave.frequency=propinput1.value;
@@ -444,7 +479,8 @@ function loadfromjson(string) {
   varcont.replaceChildren()
   effcont.replaceChildren()
   mixtrackcont.replaceChildren()
-
+  projnamef.value=json._name;
+  
   for (let wave of json.waveformdata) {
     const e=createWaveElement(wave)
     const nm=structuredClone(wave.modifiers)
@@ -484,7 +520,7 @@ async function generatewav(noteval,usetype=0) {
       keyfrequency[0]=440*2**((noteval-33-24)/12)
       break;
     case 1:
-      keyfrequency[0]=440*2**(((notenames.indexOf(noteval)+1)-33-24)/12);
+      keyfrequency[0]=440*2**(((notenames.indexOf(noteval)+1)-33-37)/12);
       break;
     case 2:
       keyfrequency[0]=noteval;
@@ -553,7 +589,7 @@ async function downloadtosfz(low,high) {
   }
   await wait(0.1)
   const zip=new JSZip()
-  zip.file("synth.sfz",stdat)
+  zip.file(`${projnamef.value}.sfz`,stdat)
   for (let i=low;i<=high;i++) {
     setexportprogress(`Generating sample ${i-low+1} of ${high-low}`,(i-low)/(high-low));
     const blob=await generatewav(i)
@@ -568,7 +604,7 @@ async function downloadtosfz(low,high) {
   zip.generateAsync({type:'blob'}).then(content=>{
     const a=document.createElement("a")
     a.href=URL.createObjectURL(content)
-    a.download="synthexport.zip"
+    a.download=`${filenamef.value}.zip`
     a.click()
   })
   setexportprogress("Completed",0)
@@ -583,22 +619,23 @@ function downloadjson() {
     timeend:timeend.value,
     voices:voicentxt.value,
     blocksize:blocksizetxt.value,
+    _name:projnamef.value,
   }
   const sdata=JSON.stringify(data)
   
-  sendfiletodownload(new Blob([sdata],{type:'application/json'}),"synth.json")
+  sendfiletodownload(new Blob([sdata],{type:'application/json'}),`${filenamef.value}.json`)
   
 }
 async function downloadwav(wfinput) {
   setexportprogress("Generating file...",0.4);
   await wait(0.1);
   const wavdat=await generatewav(wfinput,notenames.includes(wfinput)?1:2);
-  sendfiletodownload(wavdat,"sample.wav");
+  sendfiletodownload(wavdat,`${filenamef.value}.wav`);
   setexportprogress("Completed",0)
 
 }
 {
-  const options=[["wav","WAV audio"],["sfz","SFZ soundfont"],["json","JSON data file"]];
+  const options=[["wav","WAV audio"],["sfz","SFZ sampler file"],["json","JSON data file"]];
   const optdesc={"lls1":"Export as synth project data for this site. Can be imported later and edited.","wav":"Render to wave file. Good for exporting individual samples.","sfz":"Generate all note samples with an sfz instrument file, to be used in a DAW.","json":"Export synth data to JSON. File can be edited manually or loaded into WebLLSE for editing."}
   options.forEach(o => {
       const op=document.createElement("option");
@@ -609,9 +646,17 @@ async function downloadwav(wfinput) {
   exportsel.addEventListener("change",function() {
       const val=exportsel.value;
       exportdesc.innerText=optdesc[val];
+      if (exportsel.value=="wav") {
+      welbl1.style.display="flex";
+      wavexpfreq.style.display="flex";
+      } else {
+        welbl1.style.display="none";
+        wavexpfreq.style.display="none";
+      }
       
   });
   exportbtn.onclick=()=>{
+    
     switch(exportsel.value){
       case "lls1":
         downloadtosynthfile();
@@ -642,19 +687,22 @@ function g_loadinpresets() {
     });
     console.log("LOADED PRESETS")
   console.log(presets)
-  
+  let k="empty.json"
      const o1=document.createElement("option")
-      o1.value="none"
-      o1.text="--NONE--"
+      o1.value=k
+      o1.text=JSON.parse(presets[k])._name;
+      
       currpresetdd.appendChild(o1);
-  Object.keys(presets).forEach((k) =>{
+  for (let k in presets){
     if (presets.hasOwnProperty(k)) {
+      if (k==="empty.json") {continue;}
       const o=document.createElement("option")
       o.value=k
-      o.text=k
+      o.text=JSON.parse(presets[k])._name || k;
+      //console.log(presets[k]._name)
       currpresetdd.appendChild(o);
     }
-  })
+  }
 
 currpresetdd.addEventListener("change",function() {
   loadfromjson(presets[currpresetdd.value])
@@ -1569,6 +1617,7 @@ console.log("EFFECTS BEFORE GENERATE:", effects2);
 }
 
 export async function start2(play=false,idx=0) {
+    if (Object.keys(voices).length>=numvoices || voices[idx]) {return;}
     let buffer=await generatebuffer(play,idx)
     buffercache = buffer[0];
 const startTime = Number(timesttxt.value);
@@ -1584,6 +1633,7 @@ const startTime = Number(timesttxt.value);
     sourceNode;
     voices[idx]=sourceNode;
     sourceNode.start()
+    
     }
     console.log(voices)
     

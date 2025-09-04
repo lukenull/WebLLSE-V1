@@ -76,6 +76,12 @@ def docs3():
 @app.route("/docs/licensing")
 def docs4():
     return render_template("docs-license.html")
+@app.route("/docs/usagetips")
+def docs5():
+
+    return render_template("docs-tips.html")
+def docs6():
+    return render_template("docs-sys.html")
 @app.route("/gmodedit")
 def gmewin():
     return render_template("gmodwin/modulator-editor.html")
