@@ -224,31 +224,3 @@ export {module}
 
 
 
-
-
-
-
-//function mclamp(a,l,h) {
-//   return Math.min(Math.max(a,l),h)
-// }
-// function module(type,samples,params) {
-//     switch(type) {
-//         case "gain":
-//             for (let i=0;i<2;i++) {
-//                 for (let s=0;s<samples[i].length;s++) {
-//                     samples[i][s]*=10**(params.gain/20)
-//                 }
-//             }
-//             return samples;
-            
-//         case "hardclip":
-//             for (let i=0;i<2;i++) {
-//                 for (let s=0;s<samples[i].length;s++) {
-//                     const o=samples[i][s]
-//                     samples[i][s]=mclamp(o+params.pregain,0,params.threshold)+params.postgain
-//                 }
-//             }
-//     }
-// }
-
-// export {module}
