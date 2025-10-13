@@ -80,6 +80,7 @@ def docs4():
 def docs5():
 
     return render_template("docs-tips.html")
+@app.route("/docs/system")
 def docs6():
     return render_template("docs-sys.html")
 @app.route("/gmodedit")
