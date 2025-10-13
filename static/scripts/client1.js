@@ -269,7 +269,7 @@ for (let o=0;o<8;o++) { //Generate the piano keyboard
 }
 
 
-midckey.scrollIntoView();
+//midckey.scrollIntoView();
 propinput1.addEventListener("input",function(){
   if (!selectedwave) return;
   selectedwave.frequency=propinput1.value;
