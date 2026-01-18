@@ -8,6 +8,7 @@ Designed and built by LP
 
 const container = document.getElementById("container");
 const addBtn = document.getElementById("addBtn");
+const smpupload = document.getElementById("smpupload");
 const playBtn = document.getElementById("playBtn");
 const startBtn = document.getElementById("startbtn");
 const addvarb = document.getElementById("addvar");
@@ -1111,13 +1112,59 @@ function getrawwaves(t) {
 setInterval(() => {
     gtime+=0.01;
 },10);
+let smpuploadwf=null;
+let smpuploadlab=null;
+smpupload.addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  let fname=file.name;
+  let smpse;
+if (smpuploadlab!=null) {
+   
+    smpse=smpuploadlab.querySelector('._smpse');
+    smpse.text="LOADING . . .";
+    
+    smpuploadlab.value="_sample";
+    await wait(0);
+  }
+  
+  const ab = await file.arrayBuffer();
+
+  
+  const ac = new AudioContext();
+  const aub = await ac.decodeAudioData(ab);
+  
+  
+  if (smpuploadwf!=null) {
+    for (let i=0;i<=1;i++) {
+      const samples = aub.getChannelData(i);
+      smpuploadwf.sampledata[i]=new Float32Array(samples.length);
+      for (let j=0;j<samples.length;j++) {
+        smpuploadwf.sampledata[i][j]=samples[j];
+      }
+    }
+    smpuploadwf.audiosamplerate=aub.sampleRate;
+  }
+  
+
+  if (smpuploadlab!=null) {
+    if (fname.length>16) {
+      fname=fname.substring(0,13)+"...";
+    }
+    
+    smpse.text=fname;
+    
+    
+  }
+});
+
 
     let audioCtx = null;
     let activeNodes = [];
 
 
 
-    function createWaveElement(prewavepoint={waveform:"sine",frequency: "440", amplitude: "0.1", pan:"0",phase:"0",fxchain:"",mixtrack:"",modifiers: []}) {
+    function createWaveElement(prewavepoint={waveform:"sine",frequency: "440", amplitude: "0.8", pan:"0",phase:"0",fxchain:"",mixtrack:"",sampledata:[[],[]],modifiers: [],audiosamplerate:44100}) {
 
       const wavepoint=structuredClone(prewavepoint)
         waveformdata.push(wavepoint)
@@ -1161,7 +1208,7 @@ setInterval(() => {
         const waveform=qget(div,".waveformselect")   
         waveform.className="wformselect"
         
-        const options=[["sine","Sine"],["sawtooth","Sawtooth"],["square","Square"],["triangle","Triangle"],["whitenoise","White noise"]];
+        const options=[["sine","Sine"],["sawtooth","Sawtooth"],["square","Square"],["triangle","Triangle"],["whitenoise","White noise"],["sample","Sample (upload...)"]];
         options.forEach(o => {
             const op=document.createElement("option");
             op.value=o[0]
@@ -1172,7 +1219,14 @@ setInterval(() => {
         waveform.addEventListener("change",function() {
             const val=this.value;
             wavepoint.waveform=val;
-            
+            if (val=="sample") {
+              smpuploadwf=wavepoint;
+              smpuploadlab=waveform;
+              smpupload.click();
+
+            } else {
+              wavepoint.audiosamplerate=44100;
+            }
         });
 
       removeBtn.onclick = () => {

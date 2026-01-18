@@ -241,6 +241,8 @@ function getrawwaves(t,variables,waveformdata,effects) {
                 wavetab.amplitude=Number(parsemath(item.amplitude,finvars,[]));
                 wavetab.phase=Number(parsemath(item.phase,finvars,[]));
                 wavetab.pan=Number(parsemath(item.pan,finvars,[]))
+                wavetab.sampledata=item.sampledata;
+                wavetab.audiosamplerate=item.audiosamplerate;
                 //wavetab.fxchain=getrawchain(item.fxchain,finvars,effects);
                 wavetab.mixtrack=item.mixtrack;
                 wavetab.idx=idx
@@ -255,6 +257,8 @@ function getrawwaves(t,variables,waveformdata,effects) {
           wavetab.amplitude=Number(parsemath(item.amplitude,newvars,[]));
           wavetab.phase=Number(parsemath(item.phase,newvars,[]));
           wavetab.pan=Number(parsemath(item.pan,newvars,[]));
+          wavetab.sampledata=item.sampledata;
+          wavetab.audiosamplerate=item.audiosamplerate;
           //wavetab.fxchain=getrawchain(item.fxchain,variables,effects);
           wavetab.mixtrack=item.mixtrack;
           wavetab.idx=idx;
@@ -335,48 +339,66 @@ export function generateAudioBuffer(context, startTime, endTime, waveformdata,va
         
         for (let j = 0; j < wav.length; j++) {
         
-            const { waveform, frequency, amplitude, pan,phase, mixtrack,idx} = wav[j];
+            const { waveform, frequency, amplitude, pan,phase, mixtrack,idx,sampledata,audiosamplerate} = wav[j];
 
             
             //console.log(waves[j])
-            const inc = 2 * Math.PI * frequency / sampleRate;
-            phases[idx] += inc;
-            if (phases[idx] > 2 * Math.PI) {
-                phases[idx] -= 2 * Math.PI;
-            }
-            const totphase = phases[idx] + phase;
             
-            let val = 0;
-            //console.log(waveform,frequency,amplitude,pan,phase,idx,totphase)
-            switch (waveform) {
-                case "sine":
-                    val = Math.sin(totphase);
-                    break;
-                case "square":
-                    val = Math.sign(Math.sin(totphase));
-                    break;
-                case "sawtooth":
-                    val = 2 * (totphase / (2 * Math.PI) - Math.floor(totphase / (2 * Math.PI) + 0.5));
-                    break;
-                case "triangle":
-                    val = 2 * Math.abs(2 * (totphase / (2 * Math.PI) - Math.floor(totphase / Math.PI + 0.5))) - 1;
-                    break;
-                case "whitenoise":
-                    val=-1+2*Math.random();
-            }
-            let tsvl=amplitude * val*(1-(pan+1)/2);
+            if (waveform!='sample') {
+                const inc = 2 * Math.PI * frequency / sampleRate;
+                phases[idx] += inc;
+                if (phases[idx] > 2 * Math.PI) {
+                    phases[idx] -= 2 * Math.PI;
+                }
+                const totphase = phases[idx] + phase;
+                
+                let val = 0;
+                
+                switch (waveform) {
+                    case "sine":
+                        val = Math.sin(totphase);
+                        break;
+                    case "square":
+                        val = Math.sign(Math.sin(totphase));
+                        break;
+                    case "sawtooth":
+                        val = 2 * (totphase / (2 * Math.PI) - Math.floor(totphase / (2 * Math.PI) + 0.5));
+                        break;
+                    case "triangle":
+                        val = 2/Math.PI * Math.asin(Math.sin(totphase));
+                        break;
+                    case "whitenoise":
+                        val=-1+2*Math.random();
+                    
+                }
+                let tsvl=amplitude * val*(1-(pan+1)/2);
             let tsvr=amplitude * val*((pan+1)/2);
-            //console.log(fxchain)
-            // for (let e of fxchain) {
-            //     const ta=emodule.effects[e.type]([[tsvl],[tsvr]],e.params)
-            //     tsvl=ta[0][0];
-            //     tsvr=ta[1][0];
-            // }
+            
             lsampleval+=tsvl;
             rsampleval+=tsvr;
-            //console.log(rsampleval)
             phases[idx] = totphase
             if (phases[idx] > 2 * Math.PI) phases[idx] -= 2 * Math.PI;
+            } else {
+                if (i==0) {
+                    phases[idx]=0;
+                }
+                const inc = frequency / 440 * (audiosamplerate / sampleRate);
+                phases[idx] += inc;
+                const totphase = phases[idx] + phase;
+             
+                const inu=Math.floor(totphase);
+
+                let rsample=sampledata[1][inu] || 0;
+                let lsample=sampledata[0][inu] || 0;
+                let tsvl=amplitude * lsample * (1-(pan+1)/2);
+                let tsvr=amplitude * rsample * ((pan+1)/2);
+                
+                lsampleval+=tsvl;
+                rsampleval+=tsvr;
+            }
+            
+            //console.log(rsampleval)
+            
             
         }
         mixersamples[wi][0].push(lsampleval)

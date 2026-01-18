@@ -601,6 +601,9 @@
   margin-bottom:10px;
 
 }
+#smpupload {
+  display:none;
+}
 
   </style>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/topbarstyle.css') }}">
@@ -623,7 +626,8 @@
   <h1 class="titlething">WebLLSE: Web-Based Low-Level Synthesizer Experiment</h1>
    <div id="synthbodywrap">
 
-  
+  <input type="file" id="smpupload" accept=".wav,audio/wav">
+
   <div id="wrap1">
     <div id="wrap2">
       <div class="windowlabel">INSTANCES</div>
@@ -631,7 +635,9 @@
         <div class="wave-rect" id="wr-prefab">
           <button class="remove-btn">X</button>
           <button class="util-btn">E</button>
-          <select class="waveformselect" value="sine"></select>
+          <select class="waveformselect" value="sine">
+            <option value="_sample" text="" class="_smpse" style="display:none;"></option>
+          </select>
           <input class="freqinput waveinp textinputclass" placeholder="Frequency (Hz)"></input>
           <input class="ampinput waveinp textinputclass" placeholder="Amplitude (-1 - 1)"></input>
           <input class="paninput waveinp textinputclass" placeholder="Panning (-1 - 1)"></input>
@@ -715,6 +721,7 @@
   <div id="mainin-wrapper">
     <div id="buttonwrapper">
     <button id="addBtn">+Addend</button>
+    
   <button id="addvar">+Variable</button>
   <button id="addmod" style="display:none">+GraphModulator</button>
   <button id="addeff">+Effect Object</button>
